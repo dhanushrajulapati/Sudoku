@@ -1,7 +1,7 @@
 var numSelected = null;
 var tileSelected = null;
 var errors = 0;
-
+var maxErrors = 10; // default medium
 var board = [];
 var solution = [];
 
@@ -11,8 +11,21 @@ function newGame() {
     document.getElementById("board").innerHTML = "";
     document.getElementById("digits").innerHTML = "";
 
+    // Set difficulty
+    const difficulty = document.getElementById("difficulty").value;
+    if (difficulty === "easy") {
+        maxErrors = 15;
+        removeCount = 35;
+    } else if (difficulty === "medium") {
+        maxErrors = 10;
+        removeCount = 45;
+    } else if (difficulty === "hard") {
+        maxErrors = 5;
+        removeCount = 55;
+    }
+
     generateFullBoard();
-    removeCells(45); // Adjust for difficulty (e.g., 40–55)
+    removeCells(removeCount);
     setGame();
 }
 
@@ -59,13 +72,22 @@ function selectTile() {
     } else {
         errors += 1;
         document.getElementById("errors").innerText = errors;
+        if (errors >= maxErrors) {
+            alert(`Game Over! You exceeded the max errors (${maxErrors})`);
+            disableBoard();
+        }
     }
 }
+
+function disableBoard() {
+    const tiles = document.querySelectorAll(".tile");
+    tiles.forEach(tile => tile.removeEventListener("click", selectTile));
+}
+
 function generateFullBoard() {
-    // Empty 9x9 board
     solution = Array.from({ length: 9 }, () => Array(9).fill(0));
     fillBoard(solution);
-    board = solution.map(row => [...row]); // deep copy
+    board = solution.map(row => [...row]);
 }
 
 function fillBoard(board) {
